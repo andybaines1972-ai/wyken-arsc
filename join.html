@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join / Book a Taster — Wyken ARSC</title>
+<meta name="description" content="Book a free taster session with Wyken ARSC in Coventry. Skates and pads provided. Beginners of all ages welcome.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="join">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Join Us</span>
+    <h1>Book a free taster session</h1>
+    <p>Try artistic skating with no commitment — we'll lend you skates and a coach will get you moving on day one.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="grid cols-2" style="align-items:start">
+      <div>
+        <ul class="info-list">
+          <li><span class="ii">📍</span><div><b>Wyken Community Centre</b><span>Westmorland Road, Wyken, Coventry CV2 5PY</span></div></li>
+          <li><span class="ii">🗓️</span><div><b>When to come</b><span>Sat 1:00–4:00pm · Tue 6:00–8:00pm</span></div></li>
+          <li><span class="ii">👟</span><div><b>What to bring</b><span>Comfy clothes, long socks &amp; a drink. Skates &amp; pads provided for tasters.</span></div></li>
+          <li><span class="ii">💷</span><div><b>Fees</b><span>£5 taster · then termly membership + session fees (we'll explain everything)</span></div></li>
+        </ul>
+      </div>
+      <div class="form-card">
+        <h3 style="margin-bottom:16px">Taster &amp; membership enquiry</h3>
+        <form onsubmit="return submitForm(event,'Taster enquiry')">
+          <div class="row2">
+            <div class="field"><label>Skater's name</label><input required placeholder="First name"></div>
+            <div class="field"><label>Age</label><input required type="number" min="3" max="99" placeholder="e.g. 8"></div>
+          </div>
+          <div class="field"><label>Parent / your name</label><input required placeholder="Full name"></div>
+          <div class="row2">
+            <div class="field"><label>Email</label><input required type="email" placeholder="you@email.com"></div>
+            <div class="field"><label>Phone</label><input type="tel" placeholder="07…"></div>
+          </div>
+          <div class="field"><label>Any experience?</label>
+            <select><option>Complete beginner</option><option>Skated a little</option><option>Skated at another club</option></select>
+          </div>
+          <div class="field"><label>Message (optional)</label><textarea rows="2" placeholder="Anything you'd like us to know"></textarea></div>
+          <div class="field check"><input type="checkbox" id="photoConsent"><label for="photoConsent">I'm happy for photos/videos that include the skater to be shared on the club website and social media. (You can change this any time — see our Photo &amp; Media Consent document.)</label></div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center">Send enquiry →</button>
+          <p class="note">Demo form — submissions aren't sent yet. We'll wire this to the club's email or a Google Sheet when the site goes live.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+</body>
+</html>

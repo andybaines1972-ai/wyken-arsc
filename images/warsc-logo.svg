@@ -1,0 +1,9 @@
+<svg viewBox="0 0 250 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WARSC — Wyken Artistic Roller Skating Club">
+  <!-- flourish / swirl -->
+  <g fill="none" stroke="#ff1f6b" stroke-width="3" stroke-linecap="round">
+    <path d="M30 14 C 12 12, 8 34, 24 36 C 34 37, 36 22, 26 21 C 20 20.5, 19 28, 24 29"/>
+  </g>
+  <!-- wordmark -->
+  <text x="44" y="33" font-family="'Segoe UI', Arial, sans-serif" font-size="27" font-weight="800" fill="#ff1f6b" letter-spacing="1.5">WARSC</text>
+  <text x="45" y="47" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="700" fill="#e9d9e3" letter-spacing="2.4">ARTISTIC ROLLER SKATING CLUB</text>
+</svg>

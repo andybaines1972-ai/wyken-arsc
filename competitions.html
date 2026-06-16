@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitions — Wyken ARSC</title>
+<meta name="description" content="Wyken ARSC competition diary — upcoming entries, a searchable results board, RollStats skater data and club honours, including Team GB and international skaters.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="competitions">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Competition Diary</span>
+    <h1>From club floor to Team GB</h1>
+    <p>Upcoming entries, every result, RollStats skater data and our club honours.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('upcoming',this)">📅 Upcoming</div>
+      <div class="tab" onclick="switchTab('results',this)">📊 Results board</div>
+      <div class="tab" onclick="switchTab('stats',this)">📈 Skater stats</div>
+      <div class="tab" onclick="switchTab('honours',this)">🏅 Club honours</div>
+    </div>
+
+    <div class="tabpane active" id="tab-upcoming">
+      <div id="upcoming-comps"></div>
+    </div>
+
+    <div class="tabpane" id="tab-results">
+      <div class="toolbar">
+        <input type="text" id="res-search" placeholder="🔍 Search skater or event…" oninput="renderResults()">
+        <select id="res-disc" onchange="renderResults()"><option value="">All disciplines</option><option>Figures</option><option>Freestyle</option><option>Dance</option></select>
+        <select id="res-season" onchange="renderResults()"><option value="">All seasons</option><option>2026</option><option>2025</option></select>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Skater</th><th>Event</th><th>Discipline</th><th>Category</th><th>Place</th><th>Score</th></tr></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+
+    <div class="tabpane" id="tab-stats">
+      <div class="rollstats-bar">
+        <div>
+          <b>📈 RollStats — every skater's competition data, collated</b>
+          <span>Scores, personal bests and season trends pulled together from each competition. We sync our results with the national <strong>RollStart</strong> database so skaters, parents and coaches can track progress and compare across the UK.</span>
+        </div>
+        <a href="https://www.rollstart.net/" target="_blank" class="btn btn-primary btn-sm">Open RollStart ↗</a>
+      </div>
+      <div class="grid cols-2" id="stats-grid"></div>
+    </div>
+
+    <div class="tabpane" id="tab-honours">
+      <div class="grid cols-2" id="honours-list"></div>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+</body>
+</html>
