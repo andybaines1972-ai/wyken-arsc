@@ -82,7 +82,7 @@
         <p class="lead" style="margin:0">Kit orders placed through the website.</p>
         <button class="btn btn-dark btn-sm" onclick="downloadCSV()">⬇ Download CSV (opens in Sheets/Excel)</button>
       </div>
-      <div style="overflow:auto"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Total</th><th>Notes</th></tr></thead><tbody id="orders-body"></tbody></table></div>
+      <div style="overflow:auto"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th>Notes</th></tr></thead><tbody id="orders-body"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -92,7 +92,7 @@
 <script>
 const GCATS={comp:'Competitions',podium:'Podiums',showcase:'Showcases',squad:'Squad',intl:'International'};
 let shopItems=[];
-async function adminLogout(e){ if(e)e.preventDefault(); try{await fetch('/api/admin-logout',{method:'POST'});}catch(_){} window.location.href='index.html'; }
+async function adminLogout(e){ if(e)e.preventDefault(); try{await fetch('/api/logout',{method:'POST'});}catch(_){} window.location.href='index.html'; }
 function msg(id,t,ok){ const m=document.getElementById(id); m.textContent=t; m.style.color=ok?'#1c8a3b':'var(--coral)'; m.style.display='block'; }
 function downscale(file,maxPx){return new Promise((res,rej)=>{const img=new Image(),fr=new FileReader();fr.onload=()=>{img.onload=()=>{let{width:w,height:h}=img;const s=Math.min(1,maxPx/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',0.85).split(',')[1]);};img.onerror=rej;img.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
 
@@ -165,9 +165,14 @@ async function lockLoad(){ try{ const d=await (await fetch('/api/settings')).jso
 async function toggleWindow(){
   const open=document.getElementById('lock-btn').dataset.open==='1';
   const next=open?'closed':'open';
-  try{ const d=await (await fetch('/api/settings-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderWindow:next})})).json();
+  try{ const d=await (await fetch('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderWindow:next})})).json();
     if(d.ok) renderLock(next!=='closed'); else alert('Could not update the order window.');
   }catch(_){ alert('Could not update the order window.'); }
+}
+async function setStatus(id,status){
+  try{ await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'status',id,status})});
+    const o=ordersData.find(x=>String(x.id)===String(id)); if(o)o.status=status;
+  }catch(_){ alert('Could not update status.'); }
 }
 
 /* ORDERS */
@@ -176,15 +181,16 @@ function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>
 async function ordersLoad(){
   const b=document.getElementById('orders-body'); if(!b)return;
   try{
-    const d=await (await fetch('/api/orders')).json();
+    const d=await (await fetch('/api/order')).json();
     ordersData=d.items||[];
-    if(!ordersData.length){ b.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">No orders yet.</td></tr>'; return; }
-    b.innerHTML=ordersData.map(o=>`<tr><td>${new Date(o.created_at).toLocaleDateString('en-GB')}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${esc(o.phone||'')}</td><td>${(o.items||[]).map(i=>esc(i.name)+' ('+esc(i.size)+')').join('<br>')}</td><td>£${Number(o.total||0).toFixed(2)}</td><td>${esc(o.notes||'')}</td></tr>`).join('');
-  }catch(_){ b.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--coral)">Could not load orders.</td></tr>'; }
+    if(!ordersData.length){ b.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted)">No orders yet.</td></tr>'; return; }
+    const opt=(s,v)=>`<option value="${v}"${s===v?' selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`;
+    b.innerHTML=ordersData.map(o=>`<tr><td>${new Date(o.created_at).toLocaleDateString('en-GB')}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${esc(o.phone||'')}</td><td>${(o.items||[]).map(i=>esc(i.name)+' ('+esc(i.size)+')').join('<br>')}</td><td>£${Number(o.total||0).toFixed(2)}</td><td><select onchange="setStatus('${o.id}',this.value)" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--line)">${opt(o.status||'received','received')}${opt(o.status||'received','paid')}${opt(o.status||'received','delivered')}</select></td><td>${esc(o.notes||'')}</td></tr>`).join('');
+  }catch(_){ b.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--coral)">Could not load orders.</td></tr>'; }
 }
 function downloadCSV(){
-  const rows=[['Date','Name','Email','Phone','Item','Size','Price','OrderTotal','Notes']];
-  ordersData.forEach(o=>{ (o.items||[]).forEach(i=>{ rows.push([new Date(o.created_at).toISOString(),o.name,o.email,o.phone||'',i.name,i.size,i.price,o.total,(o.notes||'').replace(/\n/g,' ')]); }); });
+  const rows=[['Date','Name','Email','Phone','Item','Size','Price','OrderTotal','Status','Notes']];
+  ordersData.forEach(o=>{ (o.items||[]).forEach(i=>{ rows.push([new Date(o.created_at).toISOString(),o.name,o.email,o.phone||'',i.name,i.size,i.price,o.total,o.status||'received',(o.notes||'').replace(/\n/g,' ')]); }); });
   const csv=rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='warsc-orders.csv'; a.click();
 }

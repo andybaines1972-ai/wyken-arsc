@@ -42,8 +42,11 @@ create table if not exists orders (
   id bigint generated always as identity primary key,
   created_at timestamptz default now(),
   name text, email text, phone text, notes text,
-  total numeric, items jsonb
+  total numeric, items jsonb,
+  status text default 'received'
 );
+-- if the orders table already exists without status, run this once:
+alter table orders add column if not exists status text default 'received';
 
 -- site settings (e.g. order window open/closed)
 create table if not exists settings (
