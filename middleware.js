@@ -3,9 +3,10 @@
 export const config = { matcher: ['/members', '/members.html'] };
 
 export default function middleware(request) {
-  const token = process.env.MEMBER_SESSION || 'warsc-ok';
+  const token = process.env.MEMBER_SESSION;
   const cookie = request.headers.get('cookie') || '';
-  const authed = cookie.split(';').some(c => c.trim() === 'warsc_member=' + token);
+  // fail closed: if the server secret is missing, never grant access
+  const authed = !!token && cookie.split(';').some(c => c.trim() === 'warsc_member=' + token);
   if (authed) return; // allow through
   const url = new URL(request.url);
   url.pathname = '/login.html';

@@ -384,15 +384,31 @@ function addToCart(i){
   document.getElementById('cart-count').textContent=cart.length;
   document.getElementById('cart').style.display='block';
 }
+function val(id){ const e=document.getElementById(id); return e?e.value.trim():''; }
 function openCart(){
+  if(!cart.length){ showModal('<h3>Your kit order</h3><p>Your basket is empty.</p><button class="btn btn-primary" style="margin-top:12px" onclick="closeModal()">Close</button>'); return; }
   const total=cart.reduce((s,c)=>s+c.price,0);
   const items=cart.map((c,i)=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)"><span>${c.name} <small style="color:var(--muted)">(${c.size})</small></span><span>£${c.price.toFixed(2)} <button onclick="removeCart(${i})" style="border:0;background:none;color:var(--coral);cursor:pointer">✕</button></span></div>`).join('');
-  showModal(`<h3>Your kit order</h3>${items||'<p>Order empty.</p>'}
-    <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:12px;font-size:1.1rem"><span>Total</span><span>£${total.toFixed(2)}</span></div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px" onclick="alert('Demo: this would capture names/sizes and email the club kit officer (or write to the order spreadsheet).');closeModal()">Submit order to club →</button>
-    <p class="note">Demo basket. When live this batches into the club's term order — pay-by-bank-transfer or Stripe can be added.</p>`);
+  showModal(`<h3>Your kit order</h3>${items}
+    <div style="display:flex;justify-content:space-between;font-weight:800;margin:12px 0;font-size:1.1rem"><span>Total</span><span>£${total.toFixed(2)}</span></div>
+    <div class="field"><label>Your name</label><input id="ord-name" placeholder="Parent / member name"></div>
+    <div class="row2"><div class="field"><label>Email</label><input id="ord-email" type="email" placeholder="you@email.com"></div><div class="field"><label>Phone</label><input id="ord-phone" type="tel" placeholder="07…"></div></div>
+    <div class="field"><label>Skater name(s) for embroidery &amp; any notes</label><textarea id="ord-notes" rows="2" placeholder="e.g. embroider 'Ruby' on the hoodie"></textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="submitOrder()">Send order to club →</button>
+    <p class="note">We'll confirm by email. Payment is arranged with the club (bank transfer or at the club).</p>`);
 }
-function removeCart(i){ cart.splice(i,1); document.getElementById('cart-count').textContent=cart.length; if(!cart.length)document.getElementById('cart').style.display='none'; openCart(); }
+function submitOrder(){
+  const name=val('ord-name'), email=val('ord-email');
+  if(!name||!email){ alert('Please add your name and email so we can confirm your order.'); return; }
+  const payload={items:cart, contact:{name,email,phone:val('ord-phone')}, notes:val('ord-notes'), total:cart.reduce((s,c)=>s+c.price,0)};
+  fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json()).then(()=>{
+      cart=[]; document.getElementById('cart-count').textContent='0'; document.getElementById('cart').style.display='none';
+      showModal('<h3>Thanks! 🛼</h3><p>Your kit order has been sent to the club — we\'ll confirm by email.</p><button class="btn btn-primary" style="margin-top:12px" onclick="closeModal()">Close</button>');
+    })
+    .catch(()=>{ alert('Sorry, something went wrong sending your order. Please try again or contact the club.'); });
+}
+function removeCart(i){ cart.splice(i,1); document.getElementById('cart-count').textContent=cart.length; if(!cart.length){document.getElementById('cart').style.display='none'; closeModal(); return;} openCart(); }
 function renderGrades(){
   const el=document.getElementById('grade-grid'); if(!el)return;
   el.innerHTML=GRADES.map(g=>`<div class="grade"><div class="gnum">${g.n}</div><div><b>Grade ${g.n} — ${g.t}</b><span>${g.d}</span></div></div>`).join('');
