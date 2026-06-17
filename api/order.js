@@ -1,6 +1,5 @@
-// Receives a kit order from the basket and forwards it to the club's
-// Google Sheet (via an Apps Script web app URL kept in an env var).
-// The webhook URL + secret are server-side only, never exposed to the browser.
+// Receives a kit order from the basket. Saves it to Supabase (orders table)
+// and, if an ORDER_WEBHOOK is configured, also forwards to a Google Sheet.
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ ok: false }); return; }
   let body = req.body;
@@ -12,7 +11,6 @@ module.exports = async function handler(req, res) {
   if (!contact.name || !contact.email) { res.status(400).json({ ok: false, error: 'missing_contact' }); return; }
 
   const order = {
-    at: new Date().toISOString(),
     name: String(contact.name).slice(0, 120),
     email: String(contact.email).slice(0, 160),
     phone: String(contact.phone || '').slice(0, 40),
@@ -25,22 +23,30 @@ module.exports = async function handler(req, res) {
     }))
   };
 
+  let stored = false;
+  const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_KEY;
+  if (url && key) {
+    try {
+      const r = await fetch(`${url}/rest/v1/orders`, {
+        method: 'POST',
+        headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      stored = r.ok;
+    } catch (e) { /* fall through */ }
+  }
+
+  // optional: also push to a Google Sheet webhook
   const webhook = process.env.ORDER_WEBHOOK;
-  const secret = process.env.ORDER_SECRET || '';
-  if (!webhook) {
-    // Not configured yet — accept but flag as not delivered (visible in Vercel logs).
-    console.log('ORDER (no ORDER_WEBHOOK configured):', JSON.stringify(order));
-    res.status(200).json({ ok: true, delivered: false });
-    return;
+  if (webhook) {
+    try {
+      await fetch(webhook, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: process.env.ORDER_SECRET || '', order: { at: new Date().toISOString(), ...order } })
+      });
+    } catch (e) { /* non-fatal */ }
   }
-  try {
-    const r = await fetch(webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, order })
-    });
-    res.status(200).json({ ok: true, delivered: r.ok });
-  } catch (e) {
-    res.status(502).json({ ok: false, error: 'forward_failed' });
-  }
+
+  if (!stored && !webhook) { console.log('ORDER (no store configured):', JSON.stringify(order)); }
+  res.status(200).json({ ok: true, stored });
 };

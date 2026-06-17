@@ -36,6 +36,21 @@ create table if not exists shop (
   path text,
   url text
 );
+
+-- kit orders (captured from the shop basket; view/export in /admin → Orders tab)
+create table if not exists orders (
+  id bigint generated always as identity primary key,
+  created_at timestamptz default now(),
+  name text, email text, phone text, notes text,
+  total numeric, items jsonb
+);
+
+-- site settings (e.g. order window open/closed)
+create table if not exists settings (
+  key text primary key,
+  value text
+);
+insert into settings(key,value) values ('order_window','open') on conflict (key) do nothing;
 ```
 
 ## 4. Tell the website (env vars on Vercel)

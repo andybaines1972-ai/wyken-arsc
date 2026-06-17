@@ -352,6 +352,11 @@ function renderShopInto(id, kind){
   const el=document.getElementById(id); if(!el)return;
   el.innerHTML=SHOP_DATA.map((p,i)=>({p,i})).filter(x=>!kind||x.p.kind===kind).map(x=>productCard(x.p,x.i)).join('');
 }
+// Read the order-window lock from the cloud and re-render the public shop.
+function loadSettings(){
+  if(!document.getElementById('shop-grid')) return;
+  fetch('/api/settings').then(r=>r.json()).then(d=>{ ORDER_WINDOW.open = (d.orderWindow!=='closed'); renderShopPage(); }).catch(()=>{});
+}
 // Pull cloud-managed kit (Supabase via /api/shop); fall back to built-in if none/unconfigured.
 function loadShop(){
   if(!document.getElementById('shop-grid') && !document.getElementById('members-comp-grid')) return;
@@ -491,5 +496,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderResults(); renderStats(); renderHonours(); renderSkaters();
   renderShopPage(); renderPlanned();
   renderGalFilters(); renderGallery(); renderGrades(); renderDocs();
-  renderMembers(); loadGallery(); loadShop();
+  renderMembers(); loadGallery(); loadShop(); loadSettings();
 });

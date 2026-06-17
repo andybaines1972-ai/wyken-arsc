@@ -23,6 +23,7 @@
     <div class="tabs">
       <div class="tab active" onclick="switchTab('gallery',this)">📸 Gallery</div>
       <div class="tab" onclick="switchTab('shop',this)">🛍️ Shop</div>
+      <div class="tab" onclick="switchTab('orders',this)">🧾 Orders</div>
     </div>
 
     <!-- GALLERY -->
@@ -48,6 +49,10 @@
 
     <!-- SHOP -->
     <div class="tabpane" id="tab-shop">
+      <div class="shop-banner" id="lock-bar" style="justify-content:space-between;margin-bottom:22px">
+        <span id="lock-state">Public order window: …</span>
+        <button class="btn btn-sm" id="lock-btn" style="background:#fff;color:var(--coral)" onclick="toggleWindow()">…</button>
+      </div>
       <div class="grid cols-2" style="align-items:start">
         <div class="form-card">
           <h3 id="s-formtitle" style="margin-bottom:14px">Add a kit item</h3>
@@ -69,6 +74,15 @@
           <div id="s-list" class="grid" style="grid-template-columns:1fr 1fr;gap:12px"></div>
         </div>
       </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="tabpane" id="tab-orders">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+        <p class="lead" style="margin:0">Kit orders placed through the website.</p>
+        <button class="btn btn-dark btn-sm" onclick="downloadCSV()">⬇ Download CSV (opens in Sheets/Excel)</button>
+      </div>
+      <div style="overflow:auto"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Total</th><th>Notes</th></tr></thead><tbody id="orders-body"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -141,7 +155,41 @@ async function sSave(){
 }
 async function sDel(id,path){ if(!confirm('Delete this item?'))return; const d=await (await fetch('/api/shop-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,path})})).json(); if(d.ok)sLoad(); else alert('Delete failed.'); }
 
-document.addEventListener('DOMContentLoaded',()=>{ gLoad(); sLoad(); });
+/* LOCK / UNLOCK ORDER WINDOW */
+function renderLock(open){
+  document.getElementById('lock-state').textContent='Public order window: '+(open?'OPEN ✓':'CLOSED 🔒');
+  const btn=document.getElementById('lock-btn'); btn.textContent=open?'Lock (close orders)':'Unlock (open orders)'; btn.dataset.open=open?'1':'0';
+  document.getElementById('lock-bar').style.background=open?'linear-gradient(120deg,var(--coral),var(--coral-2))':'#5a5560';
+}
+async function lockLoad(){ try{ const d=await (await fetch('/api/settings')).json(); renderLock(d.orderWindow!=='closed'); }catch(_){ } }
+async function toggleWindow(){
+  const open=document.getElementById('lock-btn').dataset.open==='1';
+  const next=open?'closed':'open';
+  try{ const d=await (await fetch('/api/settings-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderWindow:next})})).json();
+    if(d.ok) renderLock(next!=='closed'); else alert('Could not update the order window.');
+  }catch(_){ alert('Could not update the order window.'); }
+}
+
+/* ORDERS */
+let ordersData=[];
+function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+async function ordersLoad(){
+  const b=document.getElementById('orders-body'); if(!b)return;
+  try{
+    const d=await (await fetch('/api/orders')).json();
+    ordersData=d.items||[];
+    if(!ordersData.length){ b.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">No orders yet.</td></tr>'; return; }
+    b.innerHTML=ordersData.map(o=>`<tr><td>${new Date(o.created_at).toLocaleDateString('en-GB')}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${esc(o.phone||'')}</td><td>${(o.items||[]).map(i=>esc(i.name)+' ('+esc(i.size)+')').join('<br>')}</td><td>£${Number(o.total||0).toFixed(2)}</td><td>${esc(o.notes||'')}</td></tr>`).join('');
+  }catch(_){ b.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--coral)">Could not load orders.</td></tr>'; }
+}
+function downloadCSV(){
+  const rows=[['Date','Name','Email','Phone','Item','Size','Price','OrderTotal','Notes']];
+  ordersData.forEach(o=>{ (o.items||[]).forEach(i=>{ rows.push([new Date(o.created_at).toISOString(),o.name,o.email,o.phone||'',i.name,i.size,i.price,o.total,(o.notes||'').replace(/\n/g,' ')]); }); });
+  const csv=rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='warsc-orders.csv'; a.click();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{ gLoad(); sLoad(); lockLoad(); ordersLoad(); });
 </script>
 </body>
 </html>
