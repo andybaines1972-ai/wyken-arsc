@@ -148,7 +148,7 @@ function buildHeader(){
   host.innerHTML=`
   <header class="nav">
     <div class="wrap">
-      <a href="index.html" class="logo"><img src="images/warsc-logo.svg" class="logo-img" alt="WARSC — Wyken Artistic Roller Skating Club"></a>
+      <a href="index.html" class="logo"><img src="images/warsc-logo.png" class="logo-img" alt="WARSC — Wyken Artistic Roller Skating Club" onerror="this.onerror=null;this.src='images/warsc-logo.svg'"></a>
       <nav id="nav">
         <ul>
           ${NAV_MAIN.map(li).join('')}
@@ -171,7 +171,7 @@ function buildFooter(){
   <footer>
     <div class="wrap">
       <div>
-        <a href="index.html" class="logo"><img src="images/warsc-logo.svg" class="logo-img" alt="WARSC — Wyken Artistic Roller Skating Club"></a>
+        <a href="index.html" class="logo"><img src="images/warsc-logo.png" class="logo-img" alt="WARSC — Wyken Artistic Roller Skating Club" onerror="this.onerror=null;this.src='images/warsc-logo.svg'"></a>
         <p style="margin-top:14px;font-size:.9rem;max-width:340px">A friendly, competitive artistic roller skating club in Coventry, West Midlands — affiliated to GB Skate Artistic.</p>
         <div class="social">
           <a href="https://www.instagram.com/wyken_arsc/" target="_blank" title="Instagram">📷</a>

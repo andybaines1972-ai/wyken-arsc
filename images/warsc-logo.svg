@@ -1,9 +1,18 @@
-<svg viewBox="0 0 250 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WARSC — Wyken Artistic Roller Skating Club">
-  <!-- flourish / swirl -->
-  <g fill="none" stroke="#ff1f6b" stroke-width="3" stroke-linecap="round">
-    <path d="M30 14 C 12 12, 8 34, 24 36 C 34 37, 36 22, 26 21 C 20 20.5, 19 28, 24 29"/>
+<svg viewBox="0 0 380 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WARSC — Wyken Artistic Roller Skating Club">
+  <!-- infinity ribbon -->
+  <path d="M24 100 C 24 80, 54 80, 64 100 C 74 120, 104 120, 104 100 C 104 80, 74 80, 64 100 C 54 120, 24 120, 24 100 Z"
+        fill="none" stroke="#8c8c8c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- skater silhouette (arabesque) standing on the ribbon -->
+  <g stroke="#8c8c8c" stroke-width="4.5" stroke-linecap="round" fill="none">
+    <line x1="52" y1="92" x2="55" y2="62"/>        <!-- standing leg -->
+    <line x1="55" y1="62" x2="59" y2="44"/>         <!-- torso -->
+    <line x1="58" y1="50" x2="84" y2="52"/>         <!-- front arm -->
+    <line x1="55" y1="62" x2="30" y2="50"/>         <!-- raised back leg -->
   </g>
+  <circle cx="60" cy="38" r="5.5" fill="#8c8c8c"/>  <!-- head -->
+  <path d="M48 60 L70 60 L59 46 Z" fill="#e6197d"/> <!-- pink skirt/body -->
   <!-- wordmark -->
-  <text x="44" y="33" font-family="'Segoe UI', Arial, sans-serif" font-size="27" font-weight="800" fill="#ff1f6b" letter-spacing="1.5">WARSC</text>
-  <text x="45" y="47" font-family="'Segoe UI', Arial, sans-serif" font-size="7.5" font-weight="700" fill="#e9d9e3" letter-spacing="2.4">ARTISTIC ROLLER SKATING CLUB</text>
+  <text x="118" y="96" font-family="'Segoe UI', Arial, sans-serif" font-size="62" font-weight="800" fill="#e6197d" letter-spacing="1">WARSC</text>
+  <!-- script subtitle -->
+  <text x="120" y="124" font-family="'Segoe Script','Brush Script MT','Comic Sans MS',cursive" font-style="italic" font-size="17" fill="#9a9a9a" letter-spacing="0.5">Wyken Artistic Roller Skating Club</text>
 </svg>
