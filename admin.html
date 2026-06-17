@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gallery Admin — Wyken ARSC</title>
+<title>Admin — Wyken ARSC</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="admin">
@@ -11,37 +11,63 @@
 
 <section class="page-hero">
   <div class="wrap" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
-    <div><span class="eyebrow">Committee Admin</span><h1>Gallery manager</h1><p>Add or remove photos — saved to the cloud, visible to everyone.</p></div>
+    <div><span class="eyebrow">Committee Admin</span><h1>Manage the website</h1><p>Gallery photos and club shop — saved to the cloud, no code needed.</p></div>
     <a href="#" onclick="adminLogout(event)" class="btn btn-ghost btn-sm">Log out</a>
   </div>
 </section>
 
 <section class="section">
   <div class="wrap">
-    <div id="cfg-warn" class="note" style="display:none;max-width:680px;margin-bottom:20px">⚠️ Cloud storage isn't connected yet. Add your Supabase keys (see <code>docs/gallery-supabase-setup.md</code>) and redeploy — then uploads will work.</div>
+    <div id="cfg-warn" class="note" style="display:none;max-width:680px;margin-bottom:20px">⚠️ Cloud storage isn't connected yet. Add your Supabase keys (see <code>docs/gallery-supabase-setup.md</code>) and redeploy.</div>
 
-    <div class="grid cols-2" style="align-items:start">
-      <div class="form-card">
-        <h3 style="margin-bottom:14px">Add a photo</h3>
-        <div class="field"><label>Photo</label><input type="file" id="file" accept="image/*"></div>
-        <div class="field"><label>Gallery / category</label>
-          <select id="cat">
-            <option value="comp">Competitions</option>
-            <option value="podium">Podiums</option>
-            <option value="showcase">Showcases</option>
-            <option value="squad">Squad</option>
-            <option value="intl">International</option>
-          </select>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('gallery',this)">📸 Gallery</div>
+      <div class="tab" onclick="switchTab('shop',this)">🛍️ Shop</div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="tabpane active" id="tab-gallery">
+      <div class="grid cols-2" style="align-items:start">
+        <div class="form-card">
+          <h3 style="margin-bottom:14px">Add a photo</h3>
+          <div class="field"><label>Photo</label><input type="file" id="g-file" accept="image/*"></div>
+          <div class="field"><label>Gallery / category</label>
+            <select id="g-cat"><option value="comp">Competitions</option><option value="podium">Podiums</option><option value="showcase">Showcases</option><option value="squad">Squad</option><option value="intl">International</option></select>
+          </div>
+          <div class="field"><label>Caption</label><input type="text" id="g-caption" placeholder="e.g. British Champs podium"></div>
+          <div class="field check"><input type="checkbox" id="g-consent"><label for="g-consent">I confirm we have consent to publish this photo (incl. any children shown).</label></div>
+          <p id="g-msg" style="display:none;font-weight:700;font-size:.88rem;margin-bottom:10px"></p>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" id="g-btn" onclick="gUpload()">Upload photo →</button>
         </div>
-        <div class="field"><label>Caption</label><input type="text" id="caption" placeholder="e.g. British Champs podium"></div>
-        <div class="field check"><input type="checkbox" id="consent"><label for="consent">I confirm we have consent to publish this photo (incl. any children shown).</label></div>
-        <p id="msg" style="display:none;font-weight:700;font-size:.88rem;margin-bottom:10px"></p>
-        <button class="btn btn-primary" style="width:100%;justify-content:center" id="upBtn" onclick="upload()">Upload photo →</button>
+        <div>
+          <h3 style="margin-bottom:14px">Current photos</h3>
+          <div id="g-list" class="grid" style="grid-template-columns:1fr 1fr;gap:12px"></div>
+        </div>
       </div>
+    </div>
 
-      <div>
-        <h3 style="margin-bottom:14px">Current photos</h3>
-        <div id="admin-list" class="grid" style="grid-template-columns:1fr 1fr;gap:12px"></div>
+    <!-- SHOP -->
+    <div class="tabpane" id="tab-shop">
+      <div class="grid cols-2" style="align-items:start">
+        <div class="form-card">
+          <h3 id="s-formtitle" style="margin-bottom:14px">Add a kit item</h3>
+          <input type="hidden" id="s-id">
+          <div class="field"><label>Item name</label><input type="text" id="s-name" placeholder="e.g. Club hoodie"></div>
+          <div class="row2">
+            <div class="field"><label>Price (£)</label><input type="number" id="s-price" step="0.01" min="0" placeholder="28.00"></div>
+            <div class="field"><label>Type</label><select id="s-kind"><option value="practice">Practice / general (public shop)</option><option value="comp">Squad / competition (members)</option></select></div>
+          </div>
+          <div class="field"><label>Sizes (comma separated)</label><input type="text" id="s-sizes" placeholder="Age 7-8, Age 9-11, S, M, L"></div>
+          <div class="field"><label>Description</label><input type="text" id="s-descr" placeholder="Embroidered crest + name"></div>
+          <div class="field"><label>Product photo (optional)</label><input type="file" id="s-file" accept="image/*"></div>
+          <p id="s-msg" style="display:none;font-weight:700;font-size:.88rem;margin-bottom:10px"></p>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" id="s-btn" onclick="sSave()">Save item →</button>
+          <button class="btn btn-dark btn-sm" style="width:100%;justify-content:center;margin-top:8px;background:#bbb" onclick="sReset()">Clear / new item</button>
+        </div>
+        <div>
+          <h3 style="margin-bottom:14px">Current items</h3>
+          <div id="s-list" class="grid" style="grid-template-columns:1fr 1fr;gap:12px"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -50,58 +76,72 @@
 <div id="site-footer"></div>
 <script src="app.js"></script>
 <script>
-const CATS={comp:'Competitions',podium:'Podiums',showcase:'Showcases',squad:'Squad',intl:'International'};
-async function adminLogout(e){ if(e)e.preventDefault(); try{await fetch('/api/logout',{method:'POST'});}catch(_){} // generic
-  // clear admin cookie via dedicated endpoint isn't needed; logout clears member — use admin logout:
-  try{await fetch('/api/admin-logout',{method:'POST'});}catch(_){}
-  window.location.href='index.html';
+const GCATS={comp:'Competitions',podium:'Podiums',showcase:'Showcases',squad:'Squad',intl:'International'};
+let shopItems=[];
+async function adminLogout(e){ if(e)e.preventDefault(); try{await fetch('/api/admin-logout',{method:'POST'});}catch(_){} window.location.href='index.html'; }
+function msg(id,t,ok){ const m=document.getElementById(id); m.textContent=t; m.style.color=ok?'#1c8a3b':'var(--coral)'; m.style.display='block'; }
+function downscale(file,maxPx){return new Promise((res,rej)=>{const img=new Image(),fr=new FileReader();fr.onload=()=>{img.onload=()=>{let{width:w,height:h}=img;const s=Math.min(1,maxPx/Math.max(w,h));w=Math.round(w*s);h=Math.round(h*s);const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',0.85).split(',')[1]);};img.onerror=rej;img.src=fr.result;};fr.onerror=rej;fr.readAsDataURL(file);});}
+
+/* GALLERY */
+async function gLoad(){
+  const d=await (await fetch('/api/gallery')).json();
+  if(!d.configured) document.getElementById('cfg-warn').style.display='block';
+  const el=document.getElementById('g-list');
+  el.innerHTML=(d.items&&d.items.length)?d.items.map(it=>`<div class="card" style="padding:0;overflow:hidden">
+    <div style="height:100px;background:#120f16 url('${it.img}') center/cover"></div>
+    <div style="padding:10px"><div style="font-size:.78rem;font-weight:700">${GCATS[it.cat]||it.cat}</div><div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">${it.caption||''}</div>
+    <button class="btn btn-sm" style="width:100%;justify-content:center;background:var(--coral);color:#fff" onclick="gDel('${it.id}','${(it.img||'').split('/').pop()}')">Delete</button></div></div>`).join(''):'<p class="lead" style="font-size:.9rem">No photos yet.</p>';
 }
-function setMsg(t,ok){ const m=document.getElementById('msg'); m.textContent=t; m.style.color=ok?'#1c8a3b':'var(--coral)'; m.style.display='block'; }
-async function loadList(){
-  const r=await fetch('/api/gallery'); const d=await r.json();
-  if(!d.configured){ document.getElementById('cfg-warn').style.display='block'; }
-  const el=document.getElementById('admin-list');
-  if(!d.items||!d.items.length){ el.innerHTML='<p class="lead" style="font-size:.9rem">No photos yet.</p>'; return; }
-  el.innerHTML=d.items.map(it=>`<div class="card" style="padding:0;overflow:hidden">
-    <div style="height:110px;background:#120f16 url('${it.img}') center/cover"></div>
-    <div style="padding:10px"><div style="font-size:.78rem;font-weight:700">${CATS[it.cat]||it.cat}</div>
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">${it.caption||''}</div>
-    <button class="btn btn-dark btn-sm" style="width:100%;justify-content:center;background:var(--coral)" onclick="del('${it.id}','${(it.img||'').split('/').pop()}')">Delete</button></div></div>`).join('');
+async function gUpload(){
+  const f=document.getElementById('g-file').files[0];
+  if(!f){msg('g-msg','Choose a photo first.',false);return;}
+  if(!document.getElementById('g-consent').checked){msg('g-msg','Please confirm photo consent.',false);return;}
+  const b=document.getElementById('g-btn');b.disabled=true;b.textContent='Uploading…';
+  try{const dataB64=await downscale(f,1600);
+    const d=await (await fetch('/api/gallery-upload',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:document.getElementById('g-cat').value,caption:document.getElementById('g-caption').value,ext:'jpg',dataB64})})).json();
+    if(d.ok){msg('g-msg','Uploaded ✓',true);document.getElementById('g-file').value='';document.getElementById('g-caption').value='';document.getElementById('g-consent').checked=false;gLoad();}
+    else msg('g-msg','Upload failed: '+(d.error||'error'),false);
+  }catch(_){msg('g-msg','Upload failed — try again.',false);}
+  b.disabled=false;b.textContent='Upload photo →';
 }
-function downscale(file, maxPx){
-  return new Promise((resolve,reject)=>{
-    const img=new Image(); const fr=new FileReader();
-    fr.onload=()=>{ img.onload=()=>{
-      let {width:w,height:h}=img; const scale=Math.min(1,maxPx/Math.max(w,h));
-      w=Math.round(w*scale); h=Math.round(h*scale);
-      const c=document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(c.toDataURL('image/jpeg',0.85).split(',')[1]);
-    }; img.onerror=reject; img.src=fr.result; };
-    fr.onerror=reject; fr.readAsDataURL(file);
-  });
+async function gDel(id,path){ if(!confirm('Delete this photo?'))return; const d=await (await fetch('/api/gallery-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,path})})).json(); if(d.ok)gLoad(); else alert('Delete failed.'); }
+
+/* SHOP */
+async function sLoad(){
+  const d=await (await fetch('/api/shop')).json();
+  if(!d.configured) document.getElementById('cfg-warn').style.display='block';
+  shopItems=d.items||[];
+  const el=document.getElementById('s-list');
+  el.innerHTML=shopItems.length?shopItems.map(it=>`<div class="card" style="padding:0;overflow:hidden">
+    <div style="height:90px;background:#fff ${it.img?`url('${it.img}') center/cover`:''};display:grid;place-items:center;font-size:2rem">${it.img?'':'🛼'}</div>
+    <div style="padding:10px"><div style="font-weight:700;font-size:.85rem">${it.name}</div>
+    <div style="font-size:.78rem;color:var(--muted)">£${Number(it.price).toFixed(2)} · ${it.kind==='comp'?'Members':'Public'}</div>
+    <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-sm" style="flex:1;justify-content:center;background:var(--indigo);color:#fff" onclick="sEdit('${it.id}')">Edit</button>
+    <button class="btn btn-sm" style="flex:1;justify-content:center;background:var(--coral);color:#fff" onclick="sDel('${it.id}','${(it.path||'')}')">Delete</button></div></div></div>`).join(''):'<p class="lead" style="font-size:.9rem">No items yet.</p>';
 }
-async function upload(){
-  const f=document.getElementById('file').files[0];
-  if(!f){ setMsg('Choose a photo first.',false); return; }
-  if(!document.getElementById('consent').checked){ setMsg('Please confirm photo consent.',false); return; }
-  const btn=document.getElementById('upBtn'); btn.disabled=true; btn.textContent='Uploading…';
-  try{
-    const dataB64=await downscale(f,1600);
-    const r=await fetch('/api/gallery-upload',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({category:document.getElementById('cat').value,caption:document.getElementById('caption').value,ext:'jpg',dataB64})});
-    const d=await r.json();
-    if(d.ok){ setMsg('Uploaded ✓',true); document.getElementById('file').value=''; document.getElementById('caption').value=''; document.getElementById('consent').checked=false; loadList(); }
-    else { setMsg('Upload failed: '+(d.error||'error'),false); }
-  }catch(_){ setMsg('Upload failed — please try again.',false); }
-  btn.disabled=false; btn.textContent='Upload photo →';
+function sReset(){ document.getElementById('s-id').value=''; document.getElementById('s-name').value=''; document.getElementById('s-price').value=''; document.getElementById('s-kind').value='practice'; document.getElementById('s-sizes').value=''; document.getElementById('s-descr').value=''; document.getElementById('s-file').value=''; document.getElementById('s-formtitle').textContent='Add a kit item'; document.getElementById('s-msg').style.display='none'; }
+function sEdit(id){
+  const it=shopItems.find(x=>String(x.id)===String(id)); if(!it)return;
+  document.getElementById('s-id').value=it.id; document.getElementById('s-name').value=it.name; document.getElementById('s-price').value=it.price;
+  document.getElementById('s-kind').value=it.kind; document.getElementById('s-sizes').value=(it.sizes||[]).join(', '); document.getElementById('s-descr').value=it.desc||'';
+  document.getElementById('s-file').value=''; document.getElementById('s-formtitle').textContent='Edit: '+it.name;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-async function del(id,path){
-  if(!confirm('Delete this photo?')) return;
-  const r=await fetch('/api/gallery-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,path})});
-  const d=await r.json(); if(d.ok){ loadList(); } else { alert('Delete failed.'); }
+async function sSave(){
+  const name=document.getElementById('s-name').value.trim();
+  if(!name){msg('s-msg','Item name is required.',false);return;}
+  const payload={id:document.getElementById('s-id').value||undefined,name,price:document.getElementById('s-price').value,kind:document.getElementById('s-kind').value,sizes:document.getElementById('s-sizes').value,descr:document.getElementById('s-descr').value};
+  const f=document.getElementById('s-file').files[0];
+  const b=document.getElementById('s-btn');b.disabled=true;b.textContent='Saving…';
+  try{ if(f){ payload.dataB64=await downscale(f,1000); payload.ext='jpg'; }
+    const d=await (await fetch('/api/shop-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();
+    if(d.ok){msg('s-msg','Saved ✓',true);sReset();sLoad();} else msg('s-msg','Save failed: '+(d.error||'error'),false);
+  }catch(_){msg('s-msg','Save failed — try again.',false);}
+  b.disabled=false;b.textContent='Save item →';
 }
-document.addEventListener('DOMContentLoaded',loadList);
+async function sDel(id,path){ if(!confirm('Delete this item?'))return; const d=await (await fetch('/api/shop-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,path})})).json(); if(d.ok)sLoad(); else alert('Delete failed.'); }
+
+document.addEventListener('DOMContentLoaded',()=>{ gLoad(); sLoad(); });
 </script>
 </body>
 </html>

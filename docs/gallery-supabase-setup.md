@@ -23,6 +23,19 @@ create table if not exists gallery (
   path text,
   url text
 );
+
+-- shop items (managed from /admin → Shop tab)
+create table if not exists shop (
+  id bigint generated always as identity primary key,
+  created_at timestamptz default now(),
+  name text not null,
+  price numeric not null default 0,
+  kind text not null default 'practice',
+  sizes text,
+  descr text,
+  path text,
+  url text
+);
 ```
 
 ## 4. Tell the website (env vars on Vercel)

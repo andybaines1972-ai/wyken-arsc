@@ -342,14 +342,25 @@ function renderSkaters(){
     </div></div>`).join('');
 }
 function productCard(p,i){
-  return `<div class="product"><div class="pic">${p.emoji}</div>
+  return `<div class="product"><div class="pic"${p.img?` style="background:#fff url('${p.img}') center/cover"`:''}>${p.img?'':(p.emoji||'🛼')}</div>
     <div class="pbody"><h4>${p.name}</h4><div class="price">£${p.price.toFixed(2)}</div><p>${p.desc}</p>
       <select id="sz-${i}">${p.sizes.map(s=>`<option>${s}</option>`).join('')}</select>
       <button class="add" onclick="addToCart(${i})">Add to order</button></div></div>`;
 }
+let SHOP_DATA = SHOP.slice(); // default = built-in kit; replaced by cloud items if available
 function renderShopInto(id, kind){
   const el=document.getElementById(id); if(!el)return;
-  el.innerHTML=SHOP.map((p,i)=>({p,i})).filter(x=>!kind||x.p.kind===kind).map(x=>productCard(x.p,x.i)).join('');
+  el.innerHTML=SHOP_DATA.map((p,i)=>({p,i})).filter(x=>!kind||x.p.kind===kind).map(x=>productCard(x.p,x.i)).join('');
+}
+// Pull cloud-managed kit (Supabase via /api/shop); fall back to built-in if none/unconfigured.
+function loadShop(){
+  if(!document.getElementById('shop-grid') && !document.getElementById('members-comp-grid')) return;
+  fetch('/api/shop').then(r=>r.json()).then(d=>{
+    if(d && d.configured && Array.isArray(d.items) && d.items.length){
+      SHOP_DATA = d.items;
+      renderShopPage(); renderMembers();
+    }
+  }).catch(()=>{});
 }
 // Public Shop page — GENERAL / PRACTICE kit only (squad & competition kit is members-only).
 // Shown while an order window is open, otherwise a closed notice.
@@ -379,7 +390,7 @@ async function memberLogout(e){
   window.location.href='index.html';
 }
 function addToCart(i){
-  const p=SHOP[i], size=document.getElementById('sz-'+i).value;
+  const p=SHOP_DATA[i], size=document.getElementById('sz-'+i).value;
   cart.push({name:p.name,size,price:p.price});
   document.getElementById('cart-count').textContent=cart.length;
   document.getElementById('cart').style.display='block';
@@ -480,5 +491,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderResults(); renderStats(); renderHonours(); renderSkaters();
   renderShopPage(); renderPlanned();
   renderGalFilters(); renderGallery(); renderGrades(); renderDocs();
-  renderMembers(); loadGallery();
+  renderMembers(); loadGallery(); loadShop();
 });
