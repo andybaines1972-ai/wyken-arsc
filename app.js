@@ -433,13 +433,14 @@ function setGalFilter(f){ galFilter=f; renderGalFilters(); renderGallery(); }
 function renderGallery(){
   const el=document.getElementById('gallery-grid'); if(!el)return;
   galView=GALLERY.filter(g=>galFilter==='all'||g.cat===galFilter);
-  el.innerHTML=galView.map((g,i)=>`<button class="gtile ${g.tall?'tall':''}" style="background:${g.grad}" onclick="openLightbox(${i})">
-    <span class="tagk">${GAL_CATS[g.cat]}</span><span class="ph">${g.icon}</span><span class="cap">${g.caption}</span></button>`).join('');
+  el.innerHTML=galView.map((g,i)=>`<button class="gtile ${g.tall?'tall':''}" style="background:${g.img?`#120f16 url('${g.img}') center/cover`:g.grad}" onclick="openLightbox(${i})">
+    <span class="tagk">${GAL_CATS[g.cat]}</span><span class="ph">${g.img?'':g.icon}</span><span class="cap">${g.caption}</span></button>`).join('');
 }
 function openLightbox(i){
   lbIndex=i; const g=galView[i];
-  document.getElementById('lb-img').style.background=g.grad;
-  document.getElementById('lb-img').textContent=g.icon;
+  const box=document.getElementById('lb-img');
+  box.style.background=g.img?`#120f16 url('${g.img}') center/contain no-repeat`:g.grad;
+  box.textContent=g.img?'':g.icon;
   document.getElementById('lb-cap').textContent=g.caption+'  ·  '+GAL_CATS[g.cat];
   document.getElementById('lightbox').classList.add('open');
 }
