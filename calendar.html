@@ -20,9 +20,22 @@
 
 <section class="section">
   <div class="wrap">
-    <div class="cal-filters" id="cal-filters"></div>
-    <div id="event-list"></div>
-    <p class="note" style="max-width:680px">National fixtures are pulled from the <a href="http://gbskateartistic.co.uk/calendar/" target="_blank" style="color:var(--coral);font-weight:700">GB Skate Artistic diary ↗</a>. Club sessions, gradings and socials are managed by WARSC.</p>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('allcal',this)">📅 All events</div>
+      <div class="tab" onclick="switchTab('planned',this)">⭐ Planned events</div>
+    </div>
+
+    <div class="tabpane active" id="tab-allcal">
+      <div class="cal-filters" id="cal-filters"></div>
+      <div id="event-list"></div>
+    </div>
+
+    <div class="tabpane" id="tab-planned">
+      <p class="lead" style="margin-bottom:20px">Our planned highlights — competitions, gradings, showcases and socials. (Routine weekly sessions aren't listed here — see <strong>All events</strong>.)</p>
+      <div id="planned-list"></div>
+    </div>
+
+    <p class="note" style="max-width:680px;margin-top:18px">National fixtures are pulled from the <a href="http://gbskateartistic.co.uk/calendar/" target="_blank" style="color:var(--coral);font-weight:700">GB Skate Artistic diary ↗</a>. Club sessions, gradings and socials are managed by WARSC.</p>
   </div>
 </section>
 

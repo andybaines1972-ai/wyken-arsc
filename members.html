@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Members Area — Wyken ARSC</title>
+<meta name="description" content="WARSC members area — competition kit and general practice kit ordering for club members.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="members">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Members Only</span>
+    <h1>Members area</h1>
+    <p>Competition kit and general WARSC practice kit — order any time. Members only (kit goes public when an order window is open).</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <!-- passcode gate -->
+    <div id="members-gate" class="form-card" style="max-width:430px;margin:0 auto">
+      <h3>Members' login</h3>
+      <p class="lead" style="font-size:.95rem;margin:6px 0 16px">Enter the club passcode to view competition &amp; practice kit and place orders.</p>
+      <div class="field"><label>Club passcode</label><input type="password" id="member-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')memberUnlock()"></div>
+      <p id="member-error" style="display:none;color:var(--coral);font-weight:700;font-size:.85rem;margin-bottom:10px">Incorrect passcode — try again.</p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="memberUnlock()">Enter →</button>
+      <p class="note">Demo passcode: <strong>warsc2026</strong>. This is a simple client-side gate for the prototype — a real members area would use proper logins (e.g. a membership platform or password-protected hosting).</p>
+    </div>
+
+    <!-- members content (revealed after login) -->
+    <div id="members-content" style="display:none">
+      <div class="shop-banner">🛼 Members' kit — order any time. Competition kit is for competing skaters; practice kit is for everyone.</div>
+
+      <div class="sec-head" style="margin:24px 0 16px"><span class="eyebrow">Competition Kit</span><h2>For competing skaters</h2><p class="lead">Leotards, skinsuits and team tracksuits in club black &amp; pink.</p></div>
+      <div class="grid cols-4" id="members-comp-grid"></div>
+
+      <div class="sec-head" style="margin:40px 0 16px"><span class="eyebrow">Practice Kit</span><h2>General WARSC kit for everyone</h2><p class="lead">Training tees, hoodies, shorts, bags and accessories.</p></div>
+      <div class="grid cols-4" id="members-practice-grid"></div>
+
+      <p class="note" style="max-width:680px;margin-top:20px">Use the 🛒 basket (bottom-right) to build an order — it batches into the club's term order. Names &amp; sizes are captured for embroidery.</p>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+</body>
+</html>

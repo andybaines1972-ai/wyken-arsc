@@ -15,6 +15,7 @@ const NAV_MAIN = [
   {p:'shop', label:'Club Shop', href:'shop.html'}
 ];
 const NAV_MORE = [
+  {p:'members', label:'Members', href:'members.html'},
   {p:'safeguarding', label:'Safeguarding', href:'safeguarding.html'},
   {p:'documents', label:'Documents', href:'documents.html'},
   {p:'contact', label:'Contact', href:'contact.html'}
@@ -78,15 +79,23 @@ const HONOURS = [
   {yr:'🥈', title:'Cadet Figures silver', sub:'Sophie Lane · Midlands Regional 2026'}
 ];
 
+// Members area passcode (DEMO ONLY — client-side gate, not real security).
+const MEMBER_CODE = 'warsc2026';
+// Public order window — when open:true the public Shop page shows kit; otherwise kit is members-only.
+const ORDER_WINDOW = {open:true, closes:'Fri 17 July 2026'};
+
+// kind: 'comp' = competition kit (competing skaters) · 'practice' = general WARSC practice kit (everyone)
 const SHOP = [
-  {emoji:'👕', name:'Club training tee', price:14, desc:'Breathable tee with club crest.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
-  {emoji:'🧥', name:'Club hoodie', price:28, desc:'Embroidered crest + name on the back.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
-  {emoji:'🩱', name:'Competition leotard', price:45, desc:'Club-colour competition leotard.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','XS','S','M']},
-  {emoji:'🧥', name:'Tracksuit jacket', price:38, desc:'Full-zip team jacket, name embroidered.', sizes:['Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
-  {emoji:'🎒', name:'Skate bag', price:22, desc:'Padded bag sized for quad skates.', sizes:['One size']},
-  {emoji:'🧦', name:'Club socks (2pk)', price:8, desc:'Long skating socks, club colours.', sizes:['Kids','Adult']},
-  {emoji:'🧴', name:'Water bottle', price:6, desc:'750ml club-branded bottle.', sizes:['One size']},
-  {emoji:'🛼', name:'Wheel cleaning kit', price:12, desc:'Keep those bearings smooth.', sizes:['One size']}
+  {emoji:'👕', name:'Club training tee', price:14, kind:'practice', desc:'Breathable tee with club crest.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
+  {emoji:'🧥', name:'Club hoodie', price:28, kind:'practice', desc:'Embroidered crest + name on the back.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
+  {emoji:'🩳', name:'Practice shorts', price:16, kind:'practice', desc:'Stretch shorts in club colours.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','S','M','L']},
+  {emoji:'🎒', name:'Skate bag', price:22, kind:'practice', desc:'Padded bag sized for quad skates.', sizes:['One size']},
+  {emoji:'🧦', name:'Club socks (2pk)', price:8, kind:'practice', desc:'Long skating socks, club colours.', sizes:['Kids','Adult']},
+  {emoji:'🧴', name:'Water bottle', price:6, kind:'practice', desc:'750ml club-branded bottle.', sizes:['One size']},
+  {emoji:'🩱', name:'Competition leotard', price:45, kind:'comp', desc:'Club-colour competition leotard.', sizes:['Age 5-6','Age 7-8','Age 9-11','Age 12-13','XS','S','M']},
+  {emoji:'🤸', name:'Competition skinsuit', price:58, kind:'comp', desc:'Black & pink full skinsuit for freestyle/dance.', sizes:['Age 7-8','Age 9-11','Age 12-13','XS','S','M']},
+  {emoji:'🧥', name:'Team tracksuit jacket', price:38, kind:'comp', desc:'Full-zip team jacket, name embroidered.', sizes:['Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']},
+  {emoji:'👖', name:'Team tracksuit bottoms', price:30, kind:'comp', desc:'Matching team bottoms for poolside/comp.', sizes:['Age 7-8','Age 9-11','Age 12-13','S','M','L','XL']}
 ];
 
 const GRADES = [
@@ -266,6 +275,26 @@ function renderHomeEvents(){
         <div class="meta"><span>📍 ${e.loc}</span><span>🕐 ${e.time}</span></div></div>
       <a class="btn btn-dark btn-sm" href="calendar.html">View all</a></div>`;}).join('');
 }
+function downloadIcs(e){
+  const d=e.date.replace(/-/g,'');
+  const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART;VALUE=DATE:${d}\nSUMMARY:${e.title} (Wyken ARSC)\nLOCATION:${e.loc}\nDESCRIPTION:${e.time} - ${e.note||''}\nEND:VEVENT\nEND:VCALENDAR`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'})); a.download=e.title.replace(/\s+/g,'-')+'.ics'; a.click();
+}
+// Planned events = everything except routine weekly sessions (training).
+let plannedView=[];
+function renderPlanned(){
+  const el=document.getElementById('planned-list'); if(!el)return;
+  plannedView=[...EVENTS].filter(e=>e.type!=='training').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!plannedView.length){ el.innerHTML='<p class="lead">No planned events listed yet.</p>'; return; }
+  el.innerHTML=plannedView.map((e,i)=>{const f=fmtDate(e.date), t=TYPES[e.type];
+    return `<div class="event-row" style="border-left-color:${t.colour}">
+      <div class="edate"><b>${f.day}</b><span>${f.mon}</span></div>
+      <div><span class="etype" style="background:${t.colour}">${t.label}</span>
+        <h4 style="margin-top:6px">${e.title}</h4>
+        <div class="meta"><span>📍 ${e.loc}</span><span>🕐 ${e.time}</span>${e.note?`<span>· ${e.note}</span>`:''}${e.link?`<a href="${e.link}" target="_blank" style="color:var(--coral);font-weight:700">· GBSA details ↗</a>`:''}</div></div>
+      <button class="btn btn-dark btn-sm" onclick="addPlannedCal(${i})">+ Calendar</button></div>`;}).join('');
+}
+function addPlannedCal(i){ downloadIcs(plannedView[i]); }
 function renderUpcomingComps(){
   const el=document.getElementById('upcoming-comps'); if(!el)return;
   const comps=EVENTS.filter(e=>e.type==='competition').sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -314,12 +343,43 @@ function renderSkaters(){
       <div class="pbs"><div><b>${s.grade}</b><span>Grade</span></div><div><b>${s.medals}</b><span>Medals</span></div><div><b>${s.best}</b><span>Best score</span></div></div>
     </div></div>`).join('');
 }
-function renderShop(){
-  const el=document.getElementById('shop-grid'); if(!el)return;
-  el.innerHTML=SHOP.map((p,i)=>`<div class="product"><div class="pic">${p.emoji}</div>
+function productCard(p,i){
+  return `<div class="product"><div class="pic">${p.emoji}</div>
     <div class="pbody"><h4>${p.name}</h4><div class="price">£${p.price.toFixed(2)}</div><p>${p.desc}</p>
       <select id="sz-${i}">${p.sizes.map(s=>`<option>${s}</option>`).join('')}</select>
-      <button class="add" onclick="addToCart(${i})">Add to order</button></div></div>`).join('');
+      <button class="add" onclick="addToCart(${i})">Add to order</button></div></div>`;
+}
+function renderShopInto(id, kind){
+  const el=document.getElementById(id); if(!el)return;
+  el.innerHTML=SHOP.map((p,i)=>({p,i})).filter(x=>!kind||x.p.kind===kind).map(x=>productCard(x.p,x.i)).join('');
+}
+// Public Shop page — shows kit only while an order window is open, otherwise points to the Members area.
+function renderShopPage(){
+  const el=document.getElementById('shop-grid'); if(!el)return;
+  const banner=document.getElementById('shop-banner');
+  if(ORDER_WINDOW.open){
+    if(banner) banner.style.display='';
+    renderShopInto('shop-grid');
+  } else {
+    if(banner) banner.style.display='none';
+    el.innerHTML=`<div class="card" style="grid-column:1/-1;text-align:center;padding:36px">
+      <div class="ico" style="margin:0 auto 14px">🔒</div>
+      <h3>Kit ordering is members-only right now</h3>
+      <p style="max-width:520px;margin:6px auto 0">The public order window is closed. Club members can view and order competition &amp; practice kit any time in the <a href="members.html" style="color:var(--coral);font-weight:700">Members area</a>. We open public order windows each term — check back soon.</p></div>`;
+  }
+}
+// Members area — passcode gate (demo) then full kit.
+function memberUnlock(){
+  const v=(document.getElementById('member-pass').value||'').trim();
+  if(v.toLowerCase()===MEMBER_CODE){ sessionStorage.setItem('warscMember','1'); revealMembers(); }
+  else { const e=document.getElementById('member-error'); if(e) e.style.display='block'; }
+}
+function revealMembers(){
+  const gate=document.getElementById('members-gate'), content=document.getElementById('members-content');
+  if(!gate||!content) return;
+  gate.style.display='none'; content.style.display='block';
+  renderShopInto('members-comp-grid','comp');
+  renderShopInto('members-practice-grid','practice');
 }
 function addToCart(i){
   const p=SHOP[i], size=document.getElementById('sz-'+i).value;
@@ -392,6 +452,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(!document.querySelector('link[rel="icon"]')){ const l=document.createElement('link'); l.rel='icon'; l.href='images/warsc-logo.svg'; document.head.appendChild(l); }
   buildHeader(); buildFooter(); buildOverlays();
   renderHeroEvents(); renderHomeEvents(); renderFilters(); renderEvents(); renderUpcomingComps();
-  renderResults(); renderStats(); renderHonours(); renderSkaters(); renderShop();
+  renderResults(); renderStats(); renderHonours(); renderSkaters();
+  renderShopPage(); renderPlanned();
   renderGalFilters(); renderGallery(); renderGrades(); renderDocs();
+  if(document.getElementById('members-gate') && sessionStorage.getItem('warscMember')) revealMembers();
 });
