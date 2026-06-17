@@ -199,7 +199,7 @@ function buildFooter(){
         <a href="https://brsf.co.uk/" target="_blank">British Roller Sports Fed ↗</a>
       </div>
     </div>
-    <div class="copy">© 2026 Wyken Artistic Roller Skating Club (WARSC) · Coventry · Demo site for review — sample content throughout.</div>
+    <div class="copy">© 2026 Wyken Artistic Roller Skating Club (WARSC) · Coventry · Demo site for review — sample content throughout. · <a href="admin.html" style="color:#6b6480">Committee admin</a></div>
   </footer>`;
 }
 function buildOverlays(){
@@ -423,6 +423,17 @@ function renderDocs(){
 
 /* ---------- GALLERY + LIGHTBOX ---------- */
 let galFilter='all', galView=[], lbIndex=0;
+let GALLERY_DATA = GALLERY.slice(); // default = built-in photos; replaced by cloud photos if available
+// Pull cloud-managed photos (Supabase via /api/gallery); fall back to built-in if none/unconfigured.
+function loadGallery(){
+  if(!document.getElementById('gallery-grid')) return;
+  fetch('/api/gallery').then(r=>r.json()).then(d=>{
+    if(d && d.configured && Array.isArray(d.items) && d.items.length){
+      GALLERY_DATA = d.items;
+      renderGallery();
+    }
+  }).catch(()=>{});
+}
 function renderGalFilters(){
   const el=document.getElementById('gal-filters'); if(!el)return;
   let html=`<div class="chip ${galFilter==='all'?'active':''}" onclick="setGalFilter('all')">All photos</div>`;
@@ -432,7 +443,7 @@ function renderGalFilters(){
 function setGalFilter(f){ galFilter=f; renderGalFilters(); renderGallery(); }
 function renderGallery(){
   const el=document.getElementById('gallery-grid'); if(!el)return;
-  galView=GALLERY.filter(g=>galFilter==='all'||g.cat===galFilter);
+  galView=GALLERY_DATA.filter(g=>galFilter==='all'||g.cat===galFilter);
   el.innerHTML=galView.map((g,i)=>`<button class="gtile ${g.tall?'tall':''}" style="background:${g.img?`#120f16 url('${g.img}') center/cover`:g.grad}" onclick="openLightbox(${i})">
     <span class="tagk">${GAL_CATS[g.cat]}</span><span class="ph">${g.img?'':g.icon}</span><span class="cap">${g.caption}</span></button>`).join('');
 }
@@ -469,5 +480,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderResults(); renderStats(); renderHonours(); renderSkaters();
   renderShopPage(); renderPlanned();
   renderGalFilters(); renderGallery(); renderGrades(); renderDocs();
-  renderMembers();
+  renderMembers(); loadGallery();
 });

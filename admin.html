@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery Admin — Wyken ARSC</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="admin">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
+    <div><span class="eyebrow">Committee Admin</span><h1>Gallery manager</h1><p>Add or remove photos — saved to the cloud, visible to everyone.</p></div>
+    <a href="#" onclick="adminLogout(event)" class="btn btn-ghost btn-sm">Log out</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div id="cfg-warn" class="note" style="display:none;max-width:680px;margin-bottom:20px">⚠️ Cloud storage isn't connected yet. Add your Supabase keys (see <code>docs/gallery-supabase-setup.md</code>) and redeploy — then uploads will work.</div>
+
+    <div class="grid cols-2" style="align-items:start">
+      <div class="form-card">
+        <h3 style="margin-bottom:14px">Add a photo</h3>
+        <div class="field"><label>Photo</label><input type="file" id="file" accept="image/*"></div>
+        <div class="field"><label>Gallery / category</label>
+          <select id="cat">
+            <option value="comp">Competitions</option>
+            <option value="podium">Podiums</option>
+            <option value="showcase">Showcases</option>
+            <option value="squad">Squad</option>
+            <option value="intl">International</option>
+          </select>
+        </div>
+        <div class="field"><label>Caption</label><input type="text" id="caption" placeholder="e.g. British Champs podium"></div>
+        <div class="field check"><input type="checkbox" id="consent"><label for="consent">I confirm we have consent to publish this photo (incl. any children shown).</label></div>
+        <p id="msg" style="display:none;font-weight:700;font-size:.88rem;margin-bottom:10px"></p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" id="upBtn" onclick="upload()">Upload photo →</button>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:14px">Current photos</h3>
+        <div id="admin-list" class="grid" style="grid-template-columns:1fr 1fr;gap:12px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+<script>
+const CATS={comp:'Competitions',podium:'Podiums',showcase:'Showcases',squad:'Squad',intl:'International'};
+async function adminLogout(e){ if(e)e.preventDefault(); try{await fetch('/api/logout',{method:'POST'});}catch(_){} // generic
+  // clear admin cookie via dedicated endpoint isn't needed; logout clears member — use admin logout:
+  try{await fetch('/api/admin-logout',{method:'POST'});}catch(_){}
+  window.location.href='index.html';
+}
+function setMsg(t,ok){ const m=document.getElementById('msg'); m.textContent=t; m.style.color=ok?'#1c8a3b':'var(--coral)'; m.style.display='block'; }
+async function loadList(){
+  const r=await fetch('/api/gallery'); const d=await r.json();
+  if(!d.configured){ document.getElementById('cfg-warn').style.display='block'; }
+  const el=document.getElementById('admin-list');
+  if(!d.items||!d.items.length){ el.innerHTML='<p class="lead" style="font-size:.9rem">No photos yet.</p>'; return; }
+  el.innerHTML=d.items.map(it=>`<div class="card" style="padding:0;overflow:hidden">
+    <div style="height:110px;background:#120f16 url('${it.img}') center/cover"></div>
+    <div style="padding:10px"><div style="font-size:.78rem;font-weight:700">${CATS[it.cat]||it.cat}</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">${it.caption||''}</div>
+    <button class="btn btn-dark btn-sm" style="width:100%;justify-content:center;background:var(--coral)" onclick="del('${it.id}','${(it.img||'').split('/').pop()}')">Delete</button></div></div>`).join('');
+}
+function downscale(file, maxPx){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(); const fr=new FileReader();
+    fr.onload=()=>{ img.onload=()=>{
+      let {width:w,height:h}=img; const scale=Math.min(1,maxPx/Math.max(w,h));
+      w=Math.round(w*scale); h=Math.round(h*scale);
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',0.85).split(',')[1]);
+    }; img.onerror=reject; img.src=fr.result; };
+    fr.onerror=reject; fr.readAsDataURL(file);
+  });
+}
+async function upload(){
+  const f=document.getElementById('file').files[0];
+  if(!f){ setMsg('Choose a photo first.',false); return; }
+  if(!document.getElementById('consent').checked){ setMsg('Please confirm photo consent.',false); return; }
+  const btn=document.getElementById('upBtn'); btn.disabled=true; btn.textContent='Uploading…';
+  try{
+    const dataB64=await downscale(f,1600);
+    const r=await fetch('/api/gallery-upload',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({category:document.getElementById('cat').value,caption:document.getElementById('caption').value,ext:'jpg',dataB64})});
+    const d=await r.json();
+    if(d.ok){ setMsg('Uploaded ✓',true); document.getElementById('file').value=''; document.getElementById('caption').value=''; document.getElementById('consent').checked=false; loadList(); }
+    else { setMsg('Upload failed: '+(d.error||'error'),false); }
+  }catch(_){ setMsg('Upload failed — please try again.',false); }
+  btn.disabled=false; btn.textContent='Upload photo →';
+}
+async function del(id,path){
+  if(!confirm('Delete this photo?')) return;
+  const r=await fetch('/api/gallery-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,path})});
+  const d=await r.json(); if(d.ok){ loadList(); } else { alert('Delete failed.'); }
+}
+document.addEventListener('DOMContentLoaded',loadList);
+</script>
+</body>
+</html>

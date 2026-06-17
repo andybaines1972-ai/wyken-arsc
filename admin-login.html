@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — Wyken ARSC</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="admin">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Committee Admin</span>
+    <h1>Admin login</h1>
+    <p>For committee members managing the website (e.g. the gallery).</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="form-card" style="max-width:430px;margin:0 auto">
+      <h3>Admin access</h3>
+      <p class="lead" style="font-size:.95rem;margin:6px 0 16px">Enter the committee admin password.</p>
+      <form onsubmit="return doLogin(event)">
+        <div class="field"><label>Admin password</label><input type="password" id="pw" required autocomplete="current-password" placeholder="••••••••"></div>
+        <p id="err" style="display:none;color:var(--coral);font-weight:700;font-size:.85rem;margin-bottom:10px">Incorrect password — please try again.</p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" type="submit">Log in →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+<script>
+async function doLogin(e){
+  e.preventDefault();
+  const err=document.getElementById('err'); err.style.display='none';
+  try{
+    const r=await fetch('/api/admin-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pw').value})});
+    if(r.ok){ window.location.href='admin.html'; } else { err.style.display='block'; }
+  }catch(_){ err.style.display='block'; }
+  return false;
+}
+</script>
+</body>
+</html>
