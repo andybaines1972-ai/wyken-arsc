@@ -79,8 +79,6 @@ const HONOURS = [
   {yr:'🥈', title:'Cadet Figures silver', sub:'Sophie Lane · Midlands Regional 2026'}
 ];
 
-// Members area passcode (DEMO ONLY — client-side gate, not real security).
-const MEMBER_CODE = 'warsc2026';
 // Public order window — when open:true the public Shop page shows kit; otherwise kit is members-only.
 const ORDER_WINDOW = {open:true, closes:'Fri 17 July 2026'};
 
@@ -175,7 +173,7 @@ function buildFooter(){
         <p style="margin-top:14px;font-size:.9rem;max-width:340px">A friendly, competitive artistic roller skating club in Coventry, West Midlands — affiliated to GB Skate Artistic.</p>
         <div class="social">
           <a href="https://www.instagram.com/wyken_arsc/" target="_blank" title="Instagram">📷</a>
-          <a href="https://www.facebook.com/wykenartisticr1/" target="_blank" title="Facebook">👍</a>
+          <a href="https://www.facebook.com/people/Wyken-Artistic-Roller-Skating-Club/100095233764524/" target="_blank" title="Facebook">👍</a>
           <a href="contact.html" title="Contact">📧</a>
         </div>
       </div>
@@ -368,18 +366,17 @@ function renderShopPage(){
       <p style="max-width:520px;margin:6px auto 0">The public order window is closed. Club members can view and order competition &amp; practice kit any time in the <a href="members.html" style="color:var(--coral);font-weight:700">Members area</a>. We open public order windows each term — check back soon.</p></div>`;
   }
 }
-// Members area — passcode gate (demo) then full kit.
-function memberUnlock(){
-  const v=(document.getElementById('member-pass').value||'').trim();
-  if(v.toLowerCase()===MEMBER_CODE){ sessionStorage.setItem('warscMember','1'); revealMembers(); }
-  else { const e=document.getElementById('member-error'); if(e) e.style.display='block'; }
-}
-function revealMembers(){
-  const gate=document.getElementById('members-gate'), content=document.getElementById('members-content');
-  if(!gate||!content) return;
-  gate.style.display='none'; content.style.display='block';
+// Members area — page is protected server-side by Vercel middleware (see middleware.js).
+// Here we just render the kit; access control happens before the page is served.
+function renderMembers(){
+  if(!document.getElementById('members-comp-grid')) return;
   renderShopInto('members-comp-grid','comp');
   renderShopInto('members-practice-grid','practice');
+}
+async function memberLogout(e){
+  if(e) e.preventDefault();
+  try{ await fetch('/api/logout',{method:'POST'}); }catch(_){}
+  window.location.href='index.html';
 }
 function addToCart(i){
   const p=SHOP[i], size=document.getElementById('sz-'+i).value;
@@ -455,5 +452,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderResults(); renderStats(); renderHonours(); renderSkaters();
   renderShopPage(); renderPlanned();
   renderGalFilters(); renderGallery(); renderGrades(); renderDocs();
-  if(document.getElementById('members-gate') && sessionStorage.getItem('warscMember')) revealMembers();
+  renderMembers();
 });

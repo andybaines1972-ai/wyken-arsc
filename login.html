@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Members Login — Wyken ARSC</title>
+<meta name="description" content="WARSC members login.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="members">
+<div id="site-header"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">Members Only</span>
+    <h1>Members login</h1>
+    <p>Enter the club password to view competition &amp; practice kit and place orders.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="form-card" style="max-width:430px;margin:0 auto">
+      <h3>Club members</h3>
+      <p class="lead" style="font-size:.95rem;margin:6px 0 16px">Use the club password (shared by your coach). It changes each season.</p>
+      <form onsubmit="return doLogin(event)">
+        <div class="field"><label>Club password</label><input type="password" id="pw" required autocomplete="current-password" placeholder="••••••••"></div>
+        <p id="err" style="display:none;color:var(--coral);font-weight:700;font-size:.85rem;margin-bottom:10px">Incorrect password — please try again.</p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" type="submit">Log in →</button>
+      </form>
+      <p class="note">Not a member yet? <a href="join.html" style="color:var(--coral);font-weight:700">Book a taster</a> to join the club.</p>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="app.js"></script>
+<script>
+async function doLogin(e){
+  e.preventDefault();
+  const pw=document.getElementById('pw').value;
+  const err=document.getElementById('err');
+  err.style.display='none';
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    if(r.ok){ window.location.href='members.html'; }
+    else { err.style.display='block'; }
+  }catch(_){ err.style.display='block'; }
+  return false;
+}
+</script>
+</body>
+</html>
