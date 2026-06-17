@@ -1,18 +1,18 @@
-<svg viewBox="0 0 380 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WARSC — Wyken Artistic Roller Skating Club">
+<svg viewBox="0 0 330 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WARSC — Wyken Artistic Roller Skating Club">
   <!-- infinity ribbon -->
-  <path d="M24 100 C 24 80, 54 80, 64 100 C 74 120, 104 120, 104 100 C 104 80, 74 80, 64 100 C 54 120, 24 120, 24 100 Z"
-        fill="none" stroke="#8c8c8c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 102 C 22 84, 50 84, 60 102 C 70 120, 98 120, 98 102 C 98 84, 70 84, 60 102 C 50 120, 22 120, 22 102 Z"
+        fill="none" stroke="#8c8c8c" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- skater silhouette (arabesque) standing on the ribbon -->
-  <g stroke="#8c8c8c" stroke-width="4.5" stroke-linecap="round" fill="none">
-    <line x1="52" y1="92" x2="55" y2="62"/>        <!-- standing leg -->
-    <line x1="55" y1="62" x2="59" y2="44"/>         <!-- torso -->
-    <line x1="58" y1="50" x2="84" y2="52"/>         <!-- front arm -->
-    <line x1="55" y1="62" x2="30" y2="50"/>         <!-- raised back leg -->
+  <g stroke="#8c8c8c" stroke-width="4.2" stroke-linecap="round" fill="none">
+    <line x1="50" y1="95" x2="53" y2="66"/>
+    <line x1="53" y1="66" x2="57" y2="48"/>
+    <line x1="56" y1="54" x2="80" y2="56"/>
+    <line x1="53" y1="66" x2="30" y2="55"/>
   </g>
-  <circle cx="60" cy="38" r="5.5" fill="#8c8c8c"/>  <!-- head -->
-  <path d="M48 60 L70 60 L59 46 Z" fill="#e6197d"/> <!-- pink skirt/body -->
-  <!-- wordmark -->
-  <text x="118" y="96" font-family="'Segoe UI', Arial, sans-serif" font-size="62" font-weight="800" fill="#e6197d" letter-spacing="1">WARSC</text>
-  <!-- script subtitle -->
-  <text x="120" y="124" font-family="'Segoe Script','Brush Script MT','Comic Sans MS',cursive" font-style="italic" font-size="17" fill="#9a9a9a" letter-spacing="0.5">Wyken Artistic Roller Skating Club</text>
+  <circle cx="58" cy="42" r="5.2" fill="#8c8c8c"/>
+  <path d="M47 64 L68 64 L57 50 Z" fill="#e6197d"/>
+  <!-- wordmark (fixed width so it never clips) -->
+  <text x="114" y="92" font-family="'Segoe UI', Arial, sans-serif" font-size="58" font-weight="800" fill="#e6197d" textLength="196" lengthAdjust="spacingAndGlyphs">WARSC</text>
+  <!-- script subtitle (fixed width so it never clips) -->
+  <text x="116" y="120" font-family="'Segoe Script','Brush Script MT','Comic Sans MS',cursive" font-style="italic" font-size="16" fill="#9a9a9a" textLength="196" lengthAdjust="spacingAndGlyphs">Wyken Artistic Roller Skating Club</text>
 </svg>

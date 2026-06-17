@@ -351,19 +351,20 @@ function renderShopInto(id, kind){
   const el=document.getElementById(id); if(!el)return;
   el.innerHTML=SHOP.map((p,i)=>({p,i})).filter(x=>!kind||x.p.kind===kind).map(x=>productCard(x.p,x.i)).join('');
 }
-// Public Shop page — shows kit only while an order window is open, otherwise points to the Members area.
+// Public Shop page — GENERAL / PRACTICE kit only (squad & competition kit is members-only).
+// Shown while an order window is open, otherwise a closed notice.
 function renderShopPage(){
   const el=document.getElementById('shop-grid'); if(!el)return;
   const banner=document.getElementById('shop-banner');
   if(ORDER_WINDOW.open){
     if(banner) banner.style.display='';
-    renderShopInto('shop-grid');
+    renderShopInto('shop-grid','practice');
   } else {
     if(banner) banner.style.display='none';
     el.innerHTML=`<div class="card" style="grid-column:1/-1;text-align:center;padding:36px">
       <div class="ico" style="margin:0 auto 14px">🔒</div>
-      <h3>Kit ordering is members-only right now</h3>
-      <p style="max-width:520px;margin:6px auto 0">The public order window is closed. Club members can view and order competition &amp; practice kit any time in the <a href="members.html" style="color:var(--coral);font-weight:700">Members area</a>. We open public order windows each term — check back soon.</p></div>`;
+      <h3>The general kit order window is closed</h3>
+      <p style="max-width:520px;margin:6px auto 0">We open public order windows for general &amp; practice kit each term — check back soon. Competing skaters can order squad &amp; competition kit any time in the <a href="members.html" style="color:var(--coral);font-weight:700">Members area</a>.</p></div>`;
   }
 }
 // Members area — page is protected server-side by Vercel middleware (see middleware.js).
@@ -371,7 +372,6 @@ function renderShopPage(){
 function renderMembers(){
   if(!document.getElementById('members-comp-grid')) return;
   renderShopInto('members-comp-grid','comp');
-  renderShopInto('members-practice-grid','practice');
 }
 async function memberLogout(e){
   if(e) e.preventDefault();
