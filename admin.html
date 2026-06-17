@@ -82,7 +82,7 @@
         <p class="lead" style="margin:0">Kit orders placed through the website.</p>
         <button class="btn btn-dark btn-sm" onclick="downloadCSV()">⬇ Download CSV (opens in Sheets/Excel)</button>
       </div>
-      <div style="overflow:auto"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th>Notes</th></tr></thead><tbody id="orders-body"></tbody></table></div>
+      <div style="overflow:auto"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody id="orders-body"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -174,6 +174,12 @@ async function setStatus(id,status){
     const o=ordersData.find(x=>String(x.id)===String(id)); if(o)o.status=status;
   }catch(_){ alert('Could not update status.'); }
 }
+async function delOrder(id){
+  if(!confirm('Delete this order?'))return;
+  try{ const d=await (await fetch('/api/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})})).json();
+    if(d.ok) ordersLoad(); else alert('Delete failed.');
+  }catch(_){ alert('Delete failed.'); }
+}
 
 /* ORDERS */
 let ordersData=[];
@@ -183,10 +189,10 @@ async function ordersLoad(){
   try{
     const d=await (await fetch('/api/order')).json();
     ordersData=d.items||[];
-    if(!ordersData.length){ b.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted)">No orders yet.</td></tr>'; return; }
+    if(!ordersData.length){ b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted)">No orders yet.</td></tr>'; return; }
     const opt=(s,v)=>`<option value="${v}"${s===v?' selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`;
-    b.innerHTML=ordersData.map(o=>`<tr><td>${new Date(o.created_at).toLocaleDateString('en-GB')}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${esc(o.phone||'')}</td><td>${(o.items||[]).map(i=>esc(i.name)+' ('+esc(i.size)+')').join('<br>')}</td><td>£${Number(o.total||0).toFixed(2)}</td><td><select onchange="setStatus('${o.id}',this.value)" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--line)">${opt(o.status||'received','received')}${opt(o.status||'received','paid')}${opt(o.status||'received','delivered')}</select></td><td>${esc(o.notes||'')}</td></tr>`).join('');
-  }catch(_){ b.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--coral)">Could not load orders.</td></tr>'; }
+    b.innerHTML=ordersData.map(o=>`<tr><td>${new Date(o.created_at).toLocaleDateString('en-GB')}</td><td>${esc(o.name)}</td><td>${esc(o.email)}</td><td>${esc(o.phone||'')}</td><td>${(o.items||[]).map(i=>esc(i.name)+' ('+esc(i.size)+')').join('<br>')}</td><td>£${Number(o.total||0).toFixed(2)}</td><td><select onchange="setStatus('${o.id}',this.value)" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--line)">${opt(o.status||'received','received')}${opt(o.status||'received','paid')}${opt(o.status||'received','delivered')}</select></td><td>${esc(o.notes||'')}</td><td><button class="btn btn-sm" style="background:var(--coral);color:#fff;padding:5px 10px" onclick="delOrder('${o.id}')">✕</button></td></tr>`).join('');
+  }catch(_){ b.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--coral)">Could not load orders.</td></tr>'; }
 }
 function downloadCSV(){
   const rows=[['Date','Name','Email','Phone','Item','Size','Price','OrderTotal','Status','Notes']];

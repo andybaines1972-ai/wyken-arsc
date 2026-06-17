@@ -28,6 +28,18 @@ module.exports = async function handler(req, res) {
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
 
+  // --- admin: delete an order ---
+  if (body.action === 'delete') {
+    if (!isAdmin(req)) { res.status(401).json({ ok: false, error: 'unauthorised' }); return; }
+    if (!url || !key) { res.status(503).json({ ok: false, error: 'not_configured' }); return; }
+    if (!body.id) { res.status(400).json({ ok: false, error: 'missing_id' }); return; }
+    try {
+      const r = await fetch(`${url}/rest/v1/orders?id=eq.${encodeURIComponent(body.id)}`, { method: 'DELETE', headers: { apikey: key, Authorization: `Bearer ${key}` } });
+      res.status(200).json({ ok: r.ok });
+    } catch (e) { res.status(502).json({ ok: false, error: 'exception' }); }
+    return;
+  }
+
   // --- admin: update status ---
   if (body.action === 'status') {
     if (!isAdmin(req)) { res.status(401).json({ ok: false, error: 'unauthorised' }); return; }
@@ -58,18 +70,17 @@ module.exports = async function handler(req, res) {
     status: 'received',
     items: items.slice(0, 50).map(i => ({ name: String(i.name || '').slice(0, 80), size: String(i.size || '').slice(0, 40), price: Number(i.price || 0) }))
   };
-  let stored = false, dbg;
+  let stored = false;
   if (url && key) {
     try {
       const r = await fetch(`${url}/rest/v1/orders`, { method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
       stored = r.ok;
-      if (!r.ok) { dbg = (await r.text()).slice(0, 240); }
-    } catch (e) { dbg = 'exception:' + (e && e.message); }
+    } catch (e) {}
   }
   const webhook = process.env.ORDER_WEBHOOK;
   if (webhook) {
     try { await fetch(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ secret: process.env.ORDER_SECRET || '', order: { at: new Date().toISOString(), ...order } }) }); } catch (e) {}
   }
   if (!stored && !webhook) console.log('ORDER (no store configured):', JSON.stringify(order));
-  res.status(200).json({ ok: true, stored, dbg });
+  res.status(200).json({ ok: true, stored });
 };
